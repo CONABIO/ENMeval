@@ -65,6 +65,8 @@ tuning <- function (occ, env, bg.coords, occ.grp, bg.grp, method, maxent.args,
     AUC.DIFF <- double()
     OR10 <- double()
     ORmin <- double()
+    ProbMin <- double()
+    Prob10 <- double()
 
     for (k in 1:nk) {
       train.val <- pres[group.data$occ.grp != k,, drop=FALSE]
@@ -88,9 +90,11 @@ tuning <- function (occ, env, bg.coords, occ.grp, bg.grp, method, maxent.args,
       OR10[k] <- mean(p.test < train.thr.10)
       train.thr.min <- min(p.train)
       ORmin[k] <- mean(p.test < train.thr.min)
+      ProbMin[k] <- mod@results["Minimum.training.presence.area",]
+      Prob10[k] <- mod@results["X10.percentile.training.presence.area",]
     }
     unlink(tmpfolder, recursive = TRUE)
-    stats <- c(AUC.DIFF, AUC.TEST, OR10, ORmin)
+    stats <- c(AUC.DIFF, AUC.TEST, OR10, ORmin, Prob10, ProbMin)
     return(list(full.mod, stats, predictive.map))
   }
 
@@ -135,6 +139,8 @@ tuning <- function (occ, env, bg.coords, occ.grp, bg.grp, method, maxent.args,
   AUC.TEST <- statsTbl[,(nk+1):(2*nk)]
   OR10 <- statsTbl[,((2*nk)+1):(3*nk)]
   ORmin <- statsTbl[,((3*nk)+1):(4*nk)]
+  Prob10 <- statsTbl[,((4*nk)+1):(5*nk)]
+  ProbMin <- statsTbl[,((5*nk)+1):(6*nk)]
   # rename column fields
   names(AUC.DIFF) <- paste("AUC.DIFF_bin", 1:nk, sep = ".")
   Mean.AUC.DIFF <- rowMeans(AUC.DIFF)
@@ -148,6 +154,8 @@ tuning <- function (occ, env, bg.coords, occ.grp, bg.grp, method, maxent.args,
   names(ORmin) <- paste("ORmin_bin", 1:nk, sep = ".")
   Mean.ORmin <- rowMeans(ORmin)
   Var.ORmin <- apply(ORmin, 1, var)
+  names(Prob10) <- paste("Prob10", 1:nk, sep = ".")
+  names(ProbMin) <- paste("ProbMin", 1:nk, sep = ".")
 
   # get training AUCs for each model
   full.AUC <- double()
@@ -167,9 +175,9 @@ tuning <- function (occ, env, bg.coords, occ.grp, bg.grp, method, maxent.args,
 
   res <- data.frame(settings, features, rm, full.AUC, Mean.AUC,
                     Var.AUC, Mean.AUC.DIFF, Var.AUC.DIFF, Mean.OR10, Var.OR10,
-                    Mean.ORmin, Var.ORmin, aicc)
+                    Mean.ORmin, Var.ORmin, aicc, Prob10, ProbMin)
   if (bin.output == TRUE) {
-    res <- as.data.frame(cbind(res, AUC.TEST, AUC.DIFF, OR10, ORmin))
+    res <- as.data.frame(cbind(res, AUC.TEST, AUC.DIFF, OR10, ORmin, Prob10, ProbMin))
   }
 
   if (rasterPreds==TRUE) {
