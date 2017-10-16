@@ -177,7 +177,7 @@ tuning <- function (occ, env, bg.coords, occ.grp, bg.grp, method, maxent.args,
                     Var.AUC, Mean.AUC.DIFF, Var.AUC.DIFF, Mean.OR10, Var.OR10,
                     Mean.ORmin, Var.ORmin, aicc, Prob10, ProbMin)
   if (bin.output == TRUE) {
-    res <- as.data.frame(cbind(res, AUC.TEST, AUC.DIFF, OR10, ORmin, Prob10, ProbMin))
+    res <- as.data.frame(cbind(res, AUC.TEST, AUC.DIFF, OR10, ORmin))
   }
 
   if (rasterPreds==TRUE) {
